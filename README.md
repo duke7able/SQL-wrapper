@@ -1,2 +1,11 @@
 # SQL-wrapper
 just a basic wrapper to do CRU operation
+
+# to start
+import the connection file in index.js of node server and assign it to global.pool
+Ex: 
+const createPool = require('./connection')
+.
+.
+.
+global.pool = createPool()
