@@ -55,64 +55,60 @@ class TransactionCRUD {
 
   async select(where, notEq, columns = [], isLike = false, tableName) {
     const connection = this.connection
-    return new Promise(
-      function(resolve, reject) {
-        const table = tableName || 'user'
-        const selectedColumns = columns.length ? columns.join(',') : '*'
-        let whereClause = ''
-        if (!_.isEmpty(where)) {
-          for (let key in where) {
-            whereClause += ' ' + key + " = '" + where[key] + "' and"
-          }
+    const self = this
+    return new Promise(function(resolve, reject) {
+      const table = tableName || 'user'
+      const selectedColumns = columns.length ? columns.join(',') : '*'
+      let whereClause = ''
+      if (!_.isEmpty(where)) {
+        for (let key in where) {
+          whereClause += ' ' + key + " = '" + where[key] + "' and"
         }
-        if (!_.isEmpty(notEq)) {
-          for (const key in notEq) {
-            whereClause += ' ' + key + " <> '" + notEq[key] + "' and"
-          }
+      }
+      if (!_.isEmpty(notEq)) {
+        for (const key in notEq) {
+          whereClause += ' ' + key + " <> '" + notEq[key] + "' and"
         }
-        if (!_.isEmpty(isLike)) {
-          if (whereClause !== '') {
-            whereClause += '('
-          }
-          for (let key in isLike) {
-            whereClause += ' ' + key + " LIKE '%" + isLike[key] + "%' or"
-          }
-        }
+      }
+      if (!_.isEmpty(isLike)) {
         if (whereClause !== '') {
-          if (_.isEmpty(isLike) && whereClause.length > 4) {
-            whereClause =
-              ' WHERE' + whereClause.slice(0, whereClause.length - 4)
-          } else if (!_.isEmpty(isLike) && whereClause.length > 3) {
-            whereClause =
-              ' WHERE' + whereClause.slice(0, whereClause.length - 3) + ')'
+          whereClause += '('
+        }
+        for (let key in isLike) {
+          whereClause += ' ' + key + " LIKE '%" + isLike[key] + "%' or"
+        }
+      }
+      if (whereClause !== '') {
+        if (_.isEmpty(isLike) && whereClause.length > 4) {
+          whereClause = ' WHERE' + whereClause.slice(0, whereClause.length - 4)
+        } else if (!_.isEmpty(isLike) && whereClause.length > 3) {
+          whereClause =
+            ' WHERE' + whereClause.slice(0, whereClause.length - 3) + ')'
+        }
+      }
+      if (!connection) {
+        reject(new Error('Error in customQuery Wrapper : connection not found'))
+      }
+      connection.query(
+        'SELECT ' + selectedColumns + ' From ' + table + whereClause,
+        (error, results) => {
+          if (error) {
+            console.log(
+              error,
+              'SELECT ' + selectedColumns + ' From ' + table + whereClause
+            )
+            self._rollback(error)
+            reject(error)
+          } else {
+            resolve(results)
           }
         }
-        if (!connection) {
-          reject(
-            new Error('Error in customQuery Wrapper : connection not found')
-          )
-        }
-        connection.query(
-          'SELECT ' + selectedColumns + ' From ' + table + whereClause,
-          (error, results) => {
-            if (error) {
-              console.log(
-                error,
-                'SELECT ' + selectedColumns + ' From ' + table + whereClause
-              )
-              this._rollback(error)
-              reject(error)
-            } else {
-              resolve(results)
-            }
-          }
-        )
-        connection.on('error', function(err) {
-          this._rollback(err)
-          reject(err)
-        })
-      }.bind(this)
-    )
+      )
+      connection.on('error', function(err) {
+        self._rollback(err)
+        reject(err)
+      })
+    })
   }
 
   async insert(data, tableName) {
