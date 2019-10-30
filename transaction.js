@@ -184,7 +184,7 @@ class TransactionCRUD {
 
   async _rollback(error) {
     if (this.connection) {
-      console.log('error : ', error)
+      console.log('rollback db transaction : ', error)
       this.connection.release()
       this.connection.rollback()
     } else {
