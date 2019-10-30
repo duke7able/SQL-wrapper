@@ -32,28 +32,25 @@ class TransactionCRUD {
    */
   async customQuery(query) {
     const connection = this.connection
-    return new Promise(
-      function(resolve, reject) {
-        if (!connection) {
-          reject(
-            new Error('Error in customQuery Wrapper : connection not found')
-          )
+    const self = this
+    return new Promise(function(resolve, reject) {
+      if (!connection) {
+        reject(new Error('Error in customQuery Wrapper : connection not found'))
+      }
+      connection.query(query, (error, results) => {
+        if (error) {
+          console.log(error, query)
+          self._rollback(error)
+          reject(error)
+        } else {
+          resolve(results)
         }
-        connection.query(query, (error, results) => {
-          if (error) {
-            console.log(error, query)
-            this._rollback(error)
-            reject(error)
-          } else {
-            resolve(results)
-          }
-        })
-        connection.on('error', function(err) {
-          this._rollback(err)
-          reject(err)
-        })
-      }.bind(this)
-    )
+      })
+      connection.on('error', function(err) {
+        self._rollback(err)
+        reject(err)
+      })
+    })
   }
 
   async select(where, notEq, columns = [], isLike = false, tableName) {
