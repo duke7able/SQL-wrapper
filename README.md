@@ -1,5 +1,5 @@
 # SQL-wrapper
-just a basic wrapper to do CRU operation
+just a basic wrapper to do CRUD operation
 
 # to start
 import the connection file in index.js of node server and assign it to global.pool
