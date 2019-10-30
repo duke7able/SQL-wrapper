@@ -62,12 +62,12 @@ class TransactionCRUD {
       let whereClause = ''
       if (!_.isEmpty(where)) {
         for (let key in where) {
-          whereClause += ' ' + key + " = '" + where[key] + "' and"
+          whereClause += ' ' + table + '.' + key + " = '" + where[key] + "' and"
         }
       }
       if (!_.isEmpty(notEq)) {
         for (const key in notEq) {
-          whereClause += ' ' + key + " <> '" + notEq[key] + "' and"
+          whereClause += ' ' + table + '.' + key + " <> '" + notEq[key] + "' and"
         }
       }
       if (!_.isEmpty(isLike)) {
@@ -75,7 +75,7 @@ class TransactionCRUD {
           whereClause += '('
         }
         for (let key in isLike) {
-          whereClause += ' ' + key + " LIKE '%" + isLike[key] + "%' or"
+          whereClause += ' ' + table + '.' + key + " LIKE '%" + isLike[key] + "%' or"
         }
       }
       if (whereClause !== '') {
@@ -156,12 +156,12 @@ class TransactionCRUD {
       const table = tableName || 'user'
       let updateValues = ''
       for (let key in data) {
-        updateValues += ' ' + key + " = '" + data[key] + "' ,"
+        updateValues += ' ' + table + '.' + key + " = '" + data[key] + "' ,"
       }
       updateValues = updateValues.slice(0, updateValues.length - 2)
       let whereClause = ''
       for (let key in where) {
-        whereClause += ' ' + key + " = '" + where[key] + "' and"
+        whereClause += ' ' + table + '.' + key + " = '" + where[key] + "' and"
       }
       whereClause = whereClause.slice(0, whereClause.length - 4)
       const updateQuery =
