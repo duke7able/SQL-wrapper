@@ -182,6 +182,38 @@ class TransactionCRUD {
     })
   }
 
+async delete(where, tableName) {
+    const connection = this.connection
+    const self = this
+    return new Promise(function(resolve, reject) {
+      if (!connection) {
+        reject(new Error('Error in update Wrapper : connection not found'))
+      }
+      if (_.isEmpty(where)) {
+        reject(new Error('where should be compulsory passed for update query'))
+      }
+      const table = tableName || 'user'
+      let whereClause = ''
+      for (let key in where) {
+        whereClause += ' ' + table + '.`' + key + "` = '" + where[key] + "' and"
+      }
+      whereClause = whereClause.slice(0, whereClause.length - 4)
+      const deleteQuery = 'DELETE FROM ' + table + ' WHERE' + whereClause
+      connection.query(deleteQuery, (error, results) => {
+        if (error) {
+          self._rollback(error)
+          reject(error)
+        } else {
+          resolve(results)
+        }
+      })
+      connection.on('error', function(err) {
+        self._rollback(err)
+        reject(err)
+      })
+    })
+  }
+
   async _rollback(error) {
     if (this.connection) {
       console.log('rollback db transaction : ', error)
